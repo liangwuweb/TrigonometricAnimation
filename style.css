@@ -1,0 +1,8 @@
+body {
+  background: #4caf50;
+}
+
+canvas {
+  background: pink;
+  touch-action: none;
+}
