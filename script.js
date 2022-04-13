@@ -1,54 +1,87 @@
-var c = document.getElementById('c');
-var ctx = c.getContext('2d');
-var icon = { left: 250, top: 250, x: 0, y: 0, width: 10, height: 10 };
+const Plus = function () {
+  this.x = 0;
+  this.y = 0;
+  this.left = 0;
+  this.top = 0;
+  this.width = 0;
+  this.height = 0;
+  this.scale = 1;
+}
+
+Plus.prototype.draw = function (ctx) {
+
+  ctx.setTransform(this.scale, 0, 0, this.scale, this.left + this.x, this.top + this.y);
+
+  ctx.moveTo(0, -this.height / 2);
+  ctx.lineTo(0, this.height / 2);
+
+  ctx.moveTo(-this.width / 2, 0);
+  ctx.lineTo(this.width / 2, 0);
+}
+
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+
+let signs = [];
 let mouse = { x: 0, y: 0 };
+const gridLength = 9;
+
 let mouseMoved = false;
+let mouseOver = false;
 
-TweenLite.ticker.addEventListener('tick', draw);
 
-c.addEventListener('mousemove', mouseMove);
+// For loop to create the grid
+for (i = 0; i < gridLength; i++) {
+  // create an empty array
+  signs[i] = [];
 
-function draw() {
+  // create 9 Plus obj and put them in the empty array
+  for (j = 0; j < gridLength; j++) {
+    const sign = new Plus();
 
-  if (mouseMoved) {
+    sign.left = c.width / (gridLength + 1) * (i + 1);
+    sign.top = c.height / (gridLength + 1) * (j + 1);
 
-    let dx = mouse.x - icon.left;
-    let dy = mouse.y - icon.top;
-    let angle = Math.atan2(dy, dx);
+    sign.width = 10;
+    sign.height = 10;
 
-    TweenMax.to(icon, 1,
-      {
-        x: Math.cos(angle) * 20, y: Math.sin(angle) * 20
-      });
-
+    signs[i][j] = sign;
   }
+}
 
+console.log(signs);
+
+// Event Listener
+TweenLite.ticker.addEventListener('tick', draw);
+c.addEventListener('mousemove', mouseMove);
+c.addEventListener('mouseleave', reset);
+c.addEventListener('mouseover', function() {
+  mouseOver = true;
+});
+
+
+// draw the grid
+function draw() {
+  if (mouseOver && mouseMoved) {
+    caculateIconPosition();
+    mouseMoved = false;
+  }
+ 
+  // Clear canvas
   ctx.clearRect(0, 0, c.width, c.height);
-  // save the context of clear whole canvas before transform the context, without clearRect offset x&y 250px. Restore it after drawing the icon, as result, for evey tick,
-  //the system clear the whole canvas, and do the tranform, draw the icon. After all, we restore the context, so next time we start with the
-  // default context again -> clear whole canvas, and draw the icon.
   ctx.save();
-  ctx.setTransform(1, 0, 0, 1, icon.left + icon.x, icon.top + icon.y);
+  // draw a 10 X 10 grid, with 8 X 8 icon grid in the middle
   ctx.beginPath();
-  // ctx.moveTo(-icon.width / 2, 0);
-  // ctx.lineTo(icon.width / 2, 0);
+  for (i = 0; i < gridLength; i++) {
+    for (j = 0; j < gridLength; j++) {
+      const sign = signs[i][j];
 
-  // ctx.moveTo(0, -icon.height / 2);
-  // ctx.lineTo(0, icon.height / 2);
-
-  ctx.moveTo(-5, 0);
-  ctx.lineTo(5, 0);
-
-  ctx.moveTo(0, -5);
-  ctx.lineTo(0, 5);
-
-
+      sign.draw(ctx);
+    }
+  }
   ctx.closePath();
-  ctx.stroke();
-  // restore the untransformed context
   ctx.restore();
-  mouseMoved = false;
-
+  ctx.stroke();
 }
 
 function mouseMove(e) {
@@ -57,3 +90,50 @@ function mouseMove(e) {
   mouse.y = e.clientY - rect.top;
   mouseMoved = true;
 }
+
+function caculateIconPosition() {
+  for(i = 0; i < gridLength; i++) {
+    for(j = 0; j < gridLength; j++) {
+      const sign = signs[i][j];
+      let radius = 20;
+      const dx = mouse.x - sign.left;
+      const dy = mouse.y - sign.top;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const angle = Math.atan2(dy, dx);
+
+      if(dist < radius) {
+        radius = dist;
+        TweenMax.to(sign, 0.3, {
+          scale: 2
+        })
+      } else {
+        TweenMax.to(sign, 0.3, {
+          scale: 1
+        })
+      }
+
+      TweenMax.to(sign, 0.3, {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius
+      })
+    }
+  }
+}
+
+function reset() {
+  mouseOver = false;
+  for (i = 0; i < gridLength; i++) {
+    for (j = 0; j < gridLength; j++) {
+      const sign = signs[i][j];
+      TweenMax.to(sign, 0.3, {
+        x:0,
+        y:0,
+        scale: 1
+      })
+    }
+  }
+}
+
+
+
+
