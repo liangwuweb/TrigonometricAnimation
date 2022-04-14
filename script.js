@@ -11,7 +11,7 @@ const Plus = function () {
 Plus.prototype.draw = function (ctx) {
 
   ctx.setTransform(this.scale, 0, 0, this.scale, this.left + this.x, this.top + this.y);
-
+  
   ctx.moveTo(0, -this.height / 2);
   ctx.lineTo(0, this.height / 2);
 
@@ -55,7 +55,7 @@ console.log(signs);
 TweenLite.ticker.addEventListener('tick', draw);
 c.addEventListener('mousemove', mouseMove);
 c.addEventListener('mouseleave', reset);
-c.addEventListener('mouseover', function() {
+c.addEventListener('mouseover', function () {
   mouseOver = true;
 });
 
@@ -66,7 +66,7 @@ function draw() {
     caculateIconPosition();
     mouseMoved = false;
   }
- 
+
   // Clear canvas
   ctx.clearRect(0, 0, c.width, c.height);
   ctx.save();
@@ -81,6 +81,7 @@ function draw() {
   }
   ctx.closePath();
   ctx.restore();
+  ctx.strokeStyle = "#4caf50";
   ctx.stroke();
 }
 
@@ -92,8 +93,8 @@ function mouseMove(e) {
 }
 
 function caculateIconPosition() {
-  for(i = 0; i < gridLength; i++) {
-    for(j = 0; j < gridLength; j++) {
+  for (i = 0; i < gridLength; i++) {
+    for (j = 0; j < gridLength; j++) {
       const sign = signs[i][j];
       let radius = 20;
       const dx = mouse.x - sign.left;
@@ -101,7 +102,7 @@ function caculateIconPosition() {
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
       const angle = Math.atan2(dy, dx);
 
-      if(dist < radius) {
+      if (dist < radius) {
         radius = dist;
         TweenMax.to(sign, 0.3, {
           scale: 2
@@ -126,8 +127,8 @@ function reset() {
     for (j = 0; j < gridLength; j++) {
       const sign = signs[i][j];
       TweenMax.to(sign, 0.3, {
-        x:0,
-        y:0,
+        x: 0,
+        y: 0,
         scale: 1
       })
     }

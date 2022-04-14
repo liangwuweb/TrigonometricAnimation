@@ -3,6 +3,6 @@ body {
 }
 
 canvas {
-  background: pink;
+  background: #ecf0f1;
   touch-action: none;
 }
